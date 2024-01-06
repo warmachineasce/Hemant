@@ -23,11 +23,12 @@ async def explore_and_battle():
                 character_name = event.raw_text.split()[0]
                 print(f"Received challenge from {character_name}")
 
-                # Simulate clicking the "Battle" button
-                await event.reply("Simulating click on 'Battle' button")
+                # Simulate clicking the "Battle" button with the specific character name
+                await event.click(Button.inline(f"Battle {character_name}"))
 
                 # Additional actions after clicking the "Battle" button
-                await asyncio.sleep(1)  # Adjust sleep duration as needed
+                print(f"Initiating battle against {character_name}...")
+                await asyncio.sleep(2)  # Simulate battle duration
 
                 # Continue with the rest of the script as needed
 
@@ -39,12 +40,13 @@ async def explore_and_battle():
                 # Continuously click the "Executioner_Blade" button until victory message is received
                 while True:
                     await message.edit(buttons=[[Button.inline("Executioner_Blade", data="executioner_blade_option")]])
+                    print("Clicking Executioner_Blade...")
                     await asyncio.sleep(1)  # Adjust sleep duration as needed
 
                     # Check for the "You have defeated" message
                     messages = await client.get_messages(username1, limit=1)
                     if messages and "You have defeated" in messages[0].raw_text:
-                        print("You have defeated an opponent")
+                        print(f"You have defeated {character_name}!")
                         break  # Break the loop if the victory message is received
 
                 # Send "/explore" after victory
@@ -55,4 +57,3 @@ async def explore_and_battle():
 
 # Run the script
 asyncio.run(explore_and_battle())
-                

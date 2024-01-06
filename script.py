@@ -1,7 +1,6 @@
 import asyncio
-import pyautogui
 from telethon.sessions import StringSession
-from telethon.sync import TelegramClient, events
+from telethon.sync import TelegramClient, events, Button
 
 api_id = 'your_api_id'
 api_hash = 'your_api_hash'
@@ -10,12 +9,6 @@ username1 = 'your_game_bot_username'
 
 client = TelegramClient(StringSession(session_string), api_id, api_hash)
 
-# Replace these with the actual coordinates
-battle_button_x_coordinate = 100
-battle_button_y_coordinate = 200
-executioner_blade_button_x_coordinate = 150
-executioner_blade_button_y_coordinate = 250
-
 async def explore_and_battle():
     await client.start()
 
@@ -23,30 +16,49 @@ async def explore_and_battle():
         # Send "/explore" command to the game bot
         await client.send_message(username1, "/explore")
 
-        # Wait for 2 seconds
-        await asyncio.sleep(2)
+        # Wait for the game bot to reply with the challenge message
+        @client.on(events.NewMessage(from_users=[username1]))
+        async def handle_challenge(event):
+            if "has challenged you!" in event.raw_text:
+                character_name = event.raw_text.split()[0]
+                print(f"Received challenge from {character_name}")
 
-        # Simulate clicking the "Battle" button
-        pyautogui.click(x=battle_button_x_coordinate, y=battle_button_y_coordinate)
-        
-        # Wait for 2 seconds before clicking "Executioner_Blade"
-        await asyncio.sleep(2)
+                # Simulate clicking the "Battle" and "Executioner_Blade" buttons
+                message = await event.reply("Choose an option:",
+                                            buttons=[[Button.inline("Battle", data="battle_option"),
+                                                      Button.inline("Executioner_Blade", data="executioner_blade_option")]])
 
-        # Continue clicking "Executioner_Blade" every 2 seconds until victory
-        while True:
-            # Simulate clicking the "Executioner_Blade" button
-            pyautogui.click(x=executioner_blade_button_x_coordinate, y=executioner_blade_button_y_coordinate)
-            print("Clicked Executioner_Blade button")
+                # Wait for the user to click the buttons
+                @client.on(events.CallbackQuery(data=b"battle_option"))
+                async def handle_battle_click(callback_event):
+                    print("User clicked 'Battle'")
+                    
+                    # Additional actions after clicking the "Battle" button
+                    await asyncio.sleep(1)  # Adjust sleep duration as needed
 
-            # Wait for 2 seconds
-            await asyncio.sleep(2)
+                    # Stop the event handler after handling the battle
+                    client.remove_event_handler(handle_battle_click)
 
-            # Check for the "You have defeated" message
-            messages = await client.get_messages(username1, limit=1)
-            if messages and "You have defeated" in messages[0].raw_text:
-                print("You have defeated an opponent")
-                break  # Break the loop if the victory message is received
+                @client.on(events.CallbackQuery(data=b"executioner_blade_option"))
+                async def handle_executioner_blade_click(callback_event):
+                    print("User clicked 'Executioner_Blade'")
+                    
+                    # Additional actions after clicking the "Executioner_Blade" button
+                    await asyncio.sleep(1)  # Adjust sleep duration as needed
+
+                    # Continuously click the "Executioner_Blade" button until victory message is received
+                    while True:
+                        await message.edit(buttons=[[Button.inline("Executioner_Blade", data="executioner_blade_option")]])
+                        await asyncio.sleep(1)  # Adjust sleep duration as needed
+
+                        # Check for the "You have defeated" message
+                        messages = await client.get_messages(username1, limit=1)
+                        if messages and "You have defeated" in messages[0].raw_text:
+                            print("You have defeated an opponent")
+                            break  # Break the loop if the victory message is received
+
+        # Run the event loop until disconnected
+        await client.run_until_disconnected()
 
 # Run the script
 asyncio.run(explore_and_battle())
-

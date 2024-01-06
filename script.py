@@ -32,15 +32,19 @@ async def explore_and_battle():
         # Wait for 2 seconds before clicking "Executioner_Blade"
         await asyncio.sleep(2)
 
-        # Simulate clicking the "Executioner_Blade" button
-        pyautogui.click(x=executioner_blade_button_x_coordinate, y=executioner_blade_button_y_coordinate)
-
-        # Continue with other actions as needed
+        # Continue clicking "Executioner_Blade" every 2 seconds until victory
         while True:
+            # Simulate clicking the "Executioner_Blade" button
+            pyautogui.click(x=executioner_blade_button_x_coordinate, y=executioner_blade_button_y_coordinate)
+            print("Clicked Executioner_Blade button")
+
+            # Wait for 2 seconds
+            await asyncio.sleep(2)
+
             # Check for the "You have defeated" message
             messages = await client.get_messages(username1, limit=1)
-            if messages and f"You have defeated" in messages[0].raw_text:
-                print(f"You have defeated an opponent")
+            if messages and "You have defeated" in messages[0].raw_text:
+                print("You have defeated an opponent")
                 break  # Break the loop if the victory message is received
 
 # Run the script

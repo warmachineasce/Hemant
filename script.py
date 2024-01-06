@@ -1,5 +1,6 @@
 import asyncio
 import pyautogui
+from telethon.sessions import StringSession
 from telethon.sync import TelegramClient, events
 
 api_id = '21124978'
